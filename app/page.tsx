@@ -6,31 +6,83 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, Scatter, ScatterChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, Scatter, ScatterChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 import universityData from './universityData.json'
 
+type Classroom = {
+  building: string;
+  room: string;
+  capacity: number;
+}
+
+type Department = {
+  name: string;
+  building: string;
+  budget: number;
+  faculty: number;
+  students: number;
+}
+
+type Course = {
+  id: string;
+  title: string;
+  department: string;
+  credits: number;
+  enrollment: number;
+  semester: number;
+}
+
+type Instructor = {
+  id: string;
+  name: string;
+  department: string;
+  salary: number;
+  courses: number;
+  publications: number;
+}
+
+type UniversityData = {
+  classrooms: Classroom[];
+  departments: Department[];
+  courses: Course[];
+  instructors: Instructor[];
+}
+
+type SearchType = 'classrooms' | 'departments' | 'courses' | 'instructors';
+
+type Range = {
+  min: string;
+  max: string;
+}
+
+const typedUniversityData = universityData as UniversityData;
+
 export default function Component() {
-  const [activeSearch, setActiveSearch] = useState('classrooms')
-  const [searchResults, setSearchResults] = useState([])
+  const [activeSearch, setActiveSearch] = useState<SearchType>('classrooms')
+  const [searchResults, setSearchResults] = useState<(Classroom | Department | Course | Instructor)[]>([])
   const [selectedBuilding, setSelectedBuilding] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState('')
-  const [selectedDataPoint, setSelectedDataPoint] = useState(null)
+  const [selectedDataPoint, setSelectedDataPoint] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [capacityRange, setCapacityRange] = useState({ min: '', max: '' })
-  const [budgetRange, setBudgetRange] = useState({ min: '', max: '' })
-  const [creditRange, setCreditRange] = useState({ min: '', max: '' })
-  const [salaryRange, setSalaryRange] = useState({ min: '', max: '' })
+  const [capacityRange, setCapacityRange] = useState<Range>({ min: '', max: '' })
+  const [budgetRange, setBudgetRange] = useState<Range>({ min: '', max: '' })
+  const [creditRange, setCreditRange] = useState<Range>({ min: '', max: '' })
+  const [salaryRange, setSalaryRange] = useState<Range>({ min: '', max: '' })
 
-  const buildings = useMemo(() => [...new Set(universityData.classrooms.map(c => c.building))], [])
-  const departments = useMemo(() => universityData.departments.map(d => d.name), [])
+  const buildings = useMemo(() => {
+    const buildingSet = new Set<string>();
+    typedUniversityData.classrooms.forEach(c => buildingSet.add(c.building));
+    return Array.from(buildingSet);
+  }, []);
+  const departments = useMemo(() => typedUniversityData.departments.map(d => d.name), [])
 
   const handleSearch = () => {
-    let results = []
+    let results: (Classroom | Department | Course | Instructor)[] = []
     switch (activeSearch) {
       case 'classrooms':
-        results = universityData.classrooms.filter(classroom => {
+        results = typedUniversityData.classrooms.filter(classroom => {
           const buildingMatch = !selectedBuilding || classroom.building === selectedBuilding
           const roomMatch = !searchTerm || classroom.room.toLowerCase().includes(searchTerm.toLowerCase())
           const capacityMatch = (!capacityRange.min || classroom.capacity >= parseInt(capacityRange.min)) &&
@@ -39,7 +91,7 @@ export default function Component() {
         })
         break
       case 'departments':
-        results = universityData.departments.filter(department => {
+        results = typedUniversityData.departments.filter(department => {
           const nameMatch = !searchTerm || department.name.toLowerCase().includes(searchTerm.toLowerCase())
           const buildingMatch = !selectedBuilding || department.building === selectedBuilding
           const budgetMatch = (!budgetRange.min || department.budget >= parseInt(budgetRange.min)) &&
@@ -48,7 +100,7 @@ export default function Component() {
         })
         break
       case 'courses':
-        results = universityData.courses.filter(course => {
+        results = typedUniversityData.courses.filter(course => {
           const titleMatch = !searchTerm || course.title.toLowerCase().includes(searchTerm.toLowerCase())
           const departmentMatch = !selectedDepartment || course.department === selectedDepartment
           const creditMatch = (!creditRange.min || course.credits >= parseInt(creditRange.min)) &&
@@ -57,7 +109,7 @@ export default function Component() {
         })
         break
       case 'instructors':
-        results = universityData.instructors.filter(instructor => {
+        results = typedUniversityData.instructors.filter(instructor => {
           const nameMatch = !searchTerm || instructor.name.toLowerCase().includes(searchTerm.toLowerCase())
           const departmentMatch = !selectedDepartment || instructor.department === selectedDepartment
           const salaryMatch = (!salaryRange.min || instructor.salary >= parseInt(salaryRange.min)) &&
@@ -228,7 +280,7 @@ export default function Component() {
     switch (activeSearch) {
       case 'classrooms':
         const classroomData = buildings.map(building => {
-          const rooms = universityData.classrooms.filter(c => c.building === building)
+          const rooms = typedUniversityData.classrooms.filter(c => c.building === building)
           return {
             building,
             smallRooms: rooms.filter(r => r.capacity <= 25).length,
@@ -299,13 +351,14 @@ export default function Component() {
                 students: { label: "Students", color: "hsl(var(--chart-3))" },
               }} className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={universityData.departments}>
+                  <BarChart data={typedUniversityData.departments}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
                     <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
                     <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--chart-1))" />
                     <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--chart-2))" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
+                
                     <Bar yAxisId="left" dataKey="budget" fill="hsl(var(--chart-1))" />
                     <Bar yAxisId="right" dataKey="faculty" fill="hsl(var(--chart-2))" />
                     <Bar yAxisId="right" dataKey="students" fill="hsl(var(--chart-3))" />
@@ -327,7 +380,7 @@ export default function Component() {
               {selectedDataPoint && (
                 <div className="mt-4 p-4 border border-muted rounded-md bg-secondary">
                   <h3 className="font-bold text-primary">{selectedDataPoint.name}</h3>
-                  <p>Budget:  ${selectedDataPoint.budget.toLocaleString()}</p>
+                  <p>Budget: ${selectedDataPoint.budget.toLocaleString()}</p>
                   <p>Faculty: {selectedDataPoint.faculty}</p>
                   <p>Students: {selectedDataPoint.students}</p>
                 </div>
@@ -353,7 +406,7 @@ export default function Component() {
                     <XAxis type="number" dataKey="credits" name="Credits" stroke="hsl(var(--muted-foreground))" />
                     <YAxis type="number" dataKey="enrollment" name="Enrollment" stroke="hsl(var(--muted-foreground))" />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Scatter name="Courses" data={universityData.courses} fill="hsl(var(--chart-1))" />
+                    <Scatter name="Courses" data={typedUniversityData.courses} fill="hsl(var(--chart-1))" />
                   </ScatterChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -384,7 +437,7 @@ export default function Component() {
         return (
           <Card className="bg-card border border-muted">
             <CardHeader>
-              <CardTitle  className="text-primary">Instructor Salary and Publications</CardTitle>
+              <CardTitle className="text-primary">Instructor Salary and Publications</CardTitle>
               <CardDescription>Overview of instructor salaries and publication counts</CardDescription>
             </CardHeader>
             <CardContent>
@@ -398,7 +451,7 @@ export default function Component() {
                     <XAxis type="number" dataKey="salary" name="Salary" stroke="hsl(var(--muted-foreground))" />
                     <YAxis type="number" dataKey="publications" name="Publications" stroke="hsl(var(--muted-foreground))" />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Scatter name="Instructors" data={universityData.instructors} fill="hsl(var(--chart-1))" />
+                    <Scatter name="Instructors" data={typedUniversityData.instructors} fill="hsl(var(--chart-1))" />
                   </ScatterChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -442,17 +495,20 @@ export default function Component() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              <Select onValueChange={(value) => {
-                setActiveSearch(value)
-                setSearchResults([])
-                setSearchTerm('')
-                setSelectedBuilding('')
-                setSelectedDepartment('')
-                setCapacityRange({ min: '', max: '' })
-                setBudgetRange({ min: '', max: '' })
-                setCreditRange({ min: '', max: '' })
-                setSalaryRange({ min: '', max: '' })
-              }} value={activeSearch}>
+              <Select
+                onValueChange={(value: SearchType) => {
+                  setActiveSearch(value)
+                  setSearchResults([])
+                  setSearchTerm('')
+                  setSelectedBuilding('')
+                  setSelectedDepartment('')
+                  setCapacityRange({ min: '', max: '' })
+                  setBudgetRange({ min: '', max: '' })
+                  setCreditRange({ min: '', max: '' })
+                  setSalaryRange({ min: '', max: '' })
+                }}
+                value={activeSearch}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select search type" />
                 </SelectTrigger>
@@ -486,7 +542,7 @@ export default function Component() {
                 <TableBody>
                   {searchResults.map((result, index) => (
                     <TableRow key={index} className="border-b border-muted last:border-b-0">
-                      {Object.values(result).map((value, i) => (
+                      {Object.entries(result).map(([key, value], i) => (
                         <TableCell key={i} className="border-r border-muted last:border-r-0">
                           {typeof value === 'number' ? value.toLocaleString() : value}
                         </TableCell>
