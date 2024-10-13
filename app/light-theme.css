@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 98%; /* Very light grey for background */
+    --foreground: 220 15% 15%; /* Dark neutral grey for text */
+    
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 220 15% 20%; /* Darker grey text on cards */
+ 
+    --popover: 0 0% 100%; /* White popovers */
+    --popover-foreground: 220 15% 20%; /* Dark grey for contrast */
+ 
+    --primary: 220 90% 56%; /* Soft Blue for primary elements */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+ 
+    --secondary: 210 70% 75%; /* Lighter Blue for secondary elements */
+    --secondary-foreground: 220 15% 20%; /* Darker grey foreground */
+ 
+    --muted: 210 20% 90%; /* Light grey for muted areas */
+    --muted-foreground: 210 10% 40%; /* Medium grey for text in muted areas */
+ 
+    --accent: 340 85% 65%; /* Soft Coral accent color */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
+ 
+    --destructive: 0 75% 65%; /* Red for destructive actions */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
+
+    --border: 220 10% 85%; /* Light grey border */
+    --input: 0 0% 98%; /* Light background for input fields */
+    --ring: 220 90% 56%; /* Soft blue for focus rings */
+ 
+    --radius: 0.375rem; /* Slightly rounded corners */
+
+    --chart-1: 220 90% 56%; /* Blue for charts */
+    --chart-2: 340 85% 65%; /* Coral for charts */
+    --chart-3: 45 85% 55%; /* Yellow for charts */
+    --chart-4: 150 85% 50%; /* Greenish Blue for charts */
+    --chart-5: 180 85% 50%; /* Soft Aqua */
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
