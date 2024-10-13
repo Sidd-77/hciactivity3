@@ -1,0 +1,74 @@
+{
+  "classrooms": [
+    { "id": "C101", "building": "Main Hall", "roomNumber": "101", "capacity": 30, "type": "Lecture" },
+    { "id": "C102", "building": "Main Hall", "roomNumber": "102", "capacity": 25, "type": "Seminar" },
+    { "id": "C201", "building": "Science Building", "roomNumber": "201", "capacity": 50, "type": "Laboratory" },
+    { "id": "C202", "building": "Science Building", "roomNumber": "202", "capacity": 40, "type": "Lecture" },
+    { "id": "C301", "building": "Library", "roomNumber": "301", "capacity": 20, "type": "Study Room" },
+    { "id": "C302", "building": "Library", "roomNumber": "302", "capacity": 15, "type": "Group Study" },
+    { "id": "C401", "building": "Arts Center", "roomNumber": "401", "capacity": 35, "type": "Studio" },
+    { "id": "C402", "building": "Arts Center", "roomNumber": "402", "capacity": 30, "type": "Workshop" }
+  ],
+  "departments": [
+    { "id": "D001", "name": "Computer Science", "building": "Science Building", "budget": 500000, "faculty": 20, "students": 300 },
+    { "id": "D002", "name": "Biology", "building": "Science Building", "budget": 450000, "faculty": 18, "students": 250 },
+    { "id": "D003", "name": "Literature", "building": "Main Hall", "budget": 300000, "faculty": 15, "students": 200 },
+    { "id": "D004", "name": "Physics", "building": "Science Building", "budget": 400000, "faculty": 16, "students": 180 },
+    { "id": "D005", "name": "Art History", "building": "Arts Center", "budget": 250000, "faculty": 10, "students": 150 },
+    { "id": "D006", "name": "Mathematics", "building": "Main Hall", "budget": 350000, "faculty": 14, "students": 220 }
+  ],
+  "courses": [
+    { "id": "CS101", "title": "Introduction to Programming", "department": "Computer Science", "credits": 3, "enrollment": 100, "semester": 1 },
+    { "id": "CS201", "title": "Data Structures", "department": "Computer Science", "credits": 4, "enrollment": 80, "semester": 2 },
+    { "id": "CS301", "title": "Algorithms", "department": "Computer Science", "credits": 4, "enrollment": 70, "semester": 2 },
+    { "id": "BIO101", "title": "General Biology", "department": "Biology", "credits": 3, "enrollment": 90, "semester": 1 },
+    { "id": "BIO201", "title": "Molecular Biology", "department": "Biology", "credits": 4, "enrollment": 70, "semester": 2 },
+    { "id": "BIO301", "title": "Genetics", "department": "Biology", "credits": 3, "enrollment": 65, "semester": 2 },
+    { "id": "LIT101", "title": "World Literature", "department": "Literature", "credits": 3, "enrollment": 60, "semester": 1 },
+    { "id": "LIT201", "title": "Shakespeare Studies", "department": "Literature", "credits": 3, "enrollment": 50, "semester": 2 },
+    { "id": "PHY101", "title": "Classical Mechanics", "department": "Physics", "credits": 4, "enrollment": 75, "semester": 1 },
+    { "id": "PHY201", "title": "Electromagnetism", "department": "Physics", "credits": 4, "enrollment": 65, "semester": 2 },
+    { "id": "ART101", "title": "Renaissance Art", "department": "Art History", "credits": 3, "enrollment": 40, "semester": 1 },
+    { "id": "ART201", "title": "Modern Art", "department": "Art History", "credits": 3, "enrollment": 35, "semester": 2 },
+    { "id": "MATH101", "title": "Calculus I", "department": "Mathematics", "credits": 4, "enrollment": 85, "semester": 1 },
+    { "id": "MATH201", "title": "Linear Algebra", "department": "Mathematics", "credits": 4, "enrollment": 75, "semester": 2 }
+  ],
+  "instructors": [
+    { "id": "I001", "name": "John Doe", "department": "Computer Science", "salary": 80000, "courses": 3, "publications": 15 },
+    { "id": "I002", "name": "Jane Smith", "department": "Biology", "salary": 75000, "courses": 4, "publications": 12 },
+    { "id": "I003", "name": "Bob Johnson", "department": "Literature", "salary": 70000, "courses": 5, "publications": 8 },
+    { "id": "I004", "name": "Alice Brown", "department": "Physics", "salary": 78000, "courses": 3, "publications": 20 },
+    { "id": "I005", "name": "Charlie Davis", "department": "Art History", "salary": 72000, "courses": 4, "publications": 10 },
+    { "id": "I006", "name": "Eva Wilson", "department": "Computer Science", "salary": 82000, "courses": 2, "publications": 18 },
+    { "id": "I007", "name": "Frank Miller", "department": "Biology", "salary": 76000, "courses": 3, "publications": 14 },
+    { "id": "I008", "name": "Grace Lee", "department": "Physics", "salary": 79000, "courses": 4, "publications": 22 },
+    { "id": "I009", "name": "Samuel Carter", "department": "Mathematics", "salary": 70000, "courses": 5, "publications": 9 },
+    { "id": "I010", "name": "Emily Scott", "department": "Mathematics", "salary": 71000, "courses": 4, "publications": 11 }
+  ],
+  "students": [
+    { "id": "S001", "name": "Michael Reed", "department": "Computer Science", "tot_cred": 45 },
+    { "id": "S002", "name": "Sara Johnson", "department": "Biology", "tot_cred": 40 },
+    { "id": "S003", "name": "David Smith", "department": "Physics", "tot_cred": 50 },
+    { "id": "S004", "name": "Laura Green", "department": "Literature", "tot_cred": 30 },
+    { "id": "S005", "name": "Alex Brown", "department": "Art History", "tot_cred": 35 },
+    { "id": "S006", "name": "Linda Davis", "department": "Mathematics", "tot_cred": 40 },
+    { "id": "S007", "name": "Jack Wilson", "department": "Mathematics", "tot_cred": 30 },
+    { "id": "S008", "name": "Olivia White", "department": "Biology", "tot_cred": 45 }
+  ],
+  "sections": [
+    { "course_id": "CS101", "sec_id": "001", "semester": 1, "year": 2024, "building": "Main Hall", "room_number": "101", "time_slot_id": "T1" },
+    { "course_id": "CS201", "sec_id": "002", "semester": 2, "year": 2024, "building": "Science Building", "room_number": "202", "time_slot_id": "T2" },
+    { "course_id": "BIO101", "sec_id": "003", "semester": 1, "year": 2024, "building": "Science Building", "room_number": "201", "time_slot_id": "T3" }
+  ],
+  "time_slots": [
+    { "id": "T1", "day": "Monday", "start_time": "09:00", "end_time": "10:30" },
+    { "id": "T2", "day": "Wednesday", "start_time": "10:00", "end_time": "11:30" },
+    { "id": "T3", "day": "Friday", "start_time": "13:00", "end_time": "14:30" }
+  ],
+  "advisors": [
+    { "student_id": "S001", "instructor_id": "I001" },
+    { "student_id": "S002", "instructor_id": "I002" },
+    { "student_id": "S003", "instructor_id": "I004" },
+    { "student_id": "S004", "instructor_id": "I003" }
+  ]
+}
