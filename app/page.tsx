@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -109,6 +109,72 @@ export default function Component() {
   const [budgetRange, setBudgetRange] = useState<Range>({ min: "", max: "" });
   const [creditRange, setCreditRange] = useState<Range>({ min: "", max: "" });
   const [salaryRange, setSalaryRange] = useState<Range>({ min: "", max: "" });
+  const [zoomDomain, setZoomDomain] = useState({ x: [0, 100], y: [0, 100] });
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [selectedDataPoints, setSelectedDataPoints] = useState<any[]>([]);
+  const overviewChartRef = useRef<HTMLDivElement>(null);
+  const visualizationChartRef = useRef<HTMLDivElement>(null);
+
+  const overviewData = useMemo(() => {
+    return typedUniversityData.departments.map((dept) => ({
+      name: dept.name,
+      students: dept.students,
+      courses: typedUniversityData.courses.filter(
+        (course) => course.department === dept.name
+      ).length,
+    }));
+  }, []);
+
+  const handleZoom = useCallback((domain) => {
+    setZoomDomain(domain);
+  }, []);
+
+  const handleDataPointClick = useCallback((dataPoint) => {
+    setSelectedDataPoint(dataPoint);
+  }, []);
+
+  const compareDataPoints = useCallback(() => {
+    if (selectedDataPoints.length === 2) {
+      console.log("Comparing", selectedDataPoints);
+    }
+  }, [selectedDataPoints]);
+
+  const addToHistory = useCallback((searchTerm: string) => {
+    setSearchHistory((prev) => [...prev, searchTerm]);
+  }, []);
+
+  const exportData = useCallback(() => {
+    const dataStr = JSON.stringify(searchResults);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const exportFileDefaultName = "data.json";
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  }, [searchResults]);
+
+  const exportChart = useCallback(
+    (chartRef: React.RefObject<HTMLDivElement>, filename: string) => {
+      if (chartRef.current) {
+        const svgElement = chartRef.current.querySelector("svg");
+        if (svgElement) {
+          const svgData = new XMLSerializer().serializeToString(svgElement);
+          const svgBlob = new Blob([svgData], {
+            type: "image/svg+xml;charset=utf-8",
+          });
+          const svgUrl = URL.createObjectURL(svgBlob);
+          const downloadLink = document.createElement("a");
+          downloadLink.href = svgUrl;
+          downloadLink.download = filename;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+        }
+      }
+    },
+    []
+  );
 
   const buildings = useMemo(() => {
     const buildingSet = new Set<string>();
@@ -118,6 +184,41 @@ export default function Component() {
   const departments = useMemo(
     () => typedUniversityData.departments.map((d) => d.name),
     []
+  );
+
+  const renderOverview = () => (
+    <Card className="bg-card border border-muted mb-8">
+      <CardHeader>
+        <CardTitle className="text-primary">University Overview</CardTitle>
+        <CardDescription>
+          Students per department and course count
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div ref={overviewChartRef}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={overviewData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+              <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+              <Tooltip />
+              <Legend />
+              <Bar yAxisId="left" dataKey="students" fill="#8884d8" />
+              <Bar yAxisId="right" dataKey="courses" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <Button
+          onClick={() =>
+            exportChart(overviewChartRef, "university_overview.svg")
+          }
+          className="mt-4"
+        >
+          Export Overview Chart
+        </Button>
+      </CardContent>
+    </Card>
   );
 
   const handleSearch = () => {
@@ -183,6 +284,7 @@ export default function Component() {
         break;
     }
     setSearchResults(results);
+    addToHistory(searchTerm);
   };
 
   const renderSearchOptions = () => {
@@ -392,54 +494,64 @@ export default function Component() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={{
-                  smallRooms: {
-                    label: "Small Rooms",
-                    color: "hsl(var(--chart-1))",
-                  },
-                  mediumRooms: {
-                    label: "Medium Rooms",
-                    color: "hsl(var(--chart-2))",
-                  },
-                  largeRooms: {
-                    label: "Large Rooms",
-                    color: "hsl(var(--chart-3))",
-                  },
-                }}
-                className="h-[300px]"
+              <div ref={visualizationChartRef}>
+                <ChartContainer
+                  config={{
+                    smallRooms: {
+                      label: "Small Rooms",
+                      color: "hsl(var(--chart-1))",
+                    },
+                    mediumRooms: {
+                      label: "Medium Rooms",
+                      color: "hsl(var(--chart-2))",
+                    },
+                    largeRooms: {
+                      label: "Large Rooms",
+                      color: "hsl(var(--chart-3))",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={classroomData}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--muted))"
+                      />
+                      <XAxis
+                        dataKey="building"
+                        stroke="hsl(var(--muted-foreground))"
+                      />
+                      <YAxis stroke="hsl(var(--muted-foreground))" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Legend />
+                      <Bar
+                        dataKey="smallRooms"
+                        stackId="a"
+                        fill="hsl(var(--chart-1))"
+                      />
+                      <Bar
+                        dataKey="mediumRooms"
+                        stackId="a"
+                        fill="hsl(var(--chart-2))"
+                      />
+                      <Bar
+                        dataKey="largeRooms"
+                        stackId="a"
+                        fill="hsl(var(--chart-3))"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+              <Button
+                onClick={() =>
+                  exportChart(visualizationChartRef, "data_visualization.svg")
+                }
+                className="ml-2"
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={classroomData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="hsl(var(--muted))"
-                    />
-                    <XAxis
-                      dataKey="building"
-                      stroke="hsl(var(--muted-foreground))"
-                    />
-                    <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Bar
-                      dataKey="smallRooms"
-                      stackId="a"
-                      fill="hsl(var(--chart-1))"
-                    />
-                    <Bar
-                      dataKey="mediumRooms"
-                      stackId="a"
-                      fill="hsl(var(--chart-2))"
-                    />
-                    <Bar
-                      dataKey="largeRooms"
-                      stackId="a"
-                      fill="hsl(var(--chart-3))"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                Export Visualization
+              </Button>
               <div className="mt-4">
                 <Select onValueChange={setSelectedBuilding}>
                   <SelectTrigger className="w-full">
@@ -479,55 +591,68 @@ export default function Component() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={{
-                  budget: { label: "Budget", color: "hsl(var(--chart-1))" },
-                  faculty: { label: "Faculty", color: "hsl(var(--chart-2))" },
-                  students: { label: "Students", color: "hsl(var(--chart-3))" },
-                }}
-                className="h-[300px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={typedUniversityData.departments}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="hsl(var(--muted))"
-                    />
-                    <XAxis
-                      dataKey="name"
-                      stroke="hsl(var(--muted-foreground))"
-                    />
-                    <YAxis
-                      yAxisId="left"
-                      orientation="left"
-                      stroke="hsl(var(--chart-1))"
-                    />
-                    <YAxis
-                      yAxisId="right"
-                      orientation="right"
-                      stroke="hsl(var(--chart-2))"
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
+              <div ref={visualizationChartRef}>
+                <ChartContainer
+                  config={{
+                    budget: { label: "Budget", color: "hsl(var(--chart-1))" },
+                    faculty: { label: "Faculty", color: "hsl(var(--chart-2))" },
+                    students: {
+                      label: "Students",
+                      color: "hsl(var(--chart-3))",
+                    },
+                  }}
+                  className="h-[300px]"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={typedUniversityData.departments}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--muted))"
+                      />
+                      <XAxis
+                        dataKey="name"
+                        stroke="hsl(var(--muted-foreground))"
+                      />
+                      <YAxis
+                        yAxisId="left"
+                        orientation="left"
+                        stroke="hsl(var(--chart-1))"
+                      />
+                      <YAxis
+                        yAxisId="right"
+                        orientation="right"
+                        stroke="hsl(var(--chart-2))"
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Legend />
 
-                    <Bar
-                      yAxisId="left"
-                      dataKey="budget"
-                      fill="hsl(var(--chart-1))"
-                    />
-                    <Bar
-                      yAxisId="right"
-                      dataKey="faculty"
-                      fill="hsl(var(--chart-2))"
-                    />
-                    <Bar
-                      yAxisId="right"
-                      dataKey="students"
-                      fill="hsl(var(--chart-3))"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                      <Bar
+                        yAxisId="left"
+                        dataKey="budget"
+                        fill="hsl(var(--chart-1))"
+                      />
+                      <Bar
+                        yAxisId="right"
+                        dataKey="faculty"
+                        fill="hsl(var(--chart-2))"
+                      />
+                      <Bar
+                        yAxisId="right"
+                        dataKey="students"
+                        fill="hsl(var(--chart-3))"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+              <Button
+                onClick={() =>
+                  exportChart(visualizationChartRef, "data_visualization.svg")
+                }
+                className="ml-2"
+              >
+                Export Visualization
+              </Button>
               <div className="mt-4">
                 <Select onValueChange={setSelectedDepartment}>
                   <SelectTrigger className="w-full">
@@ -705,11 +830,28 @@ export default function Component() {
     }
   };
 
+  const renderHistory = () => (
+    <Card className="bg-card border border-muted mt-8">
+      <CardHeader>
+        <CardTitle className="text-primary">Search History</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul>
+          {searchHistory.map((term, index) => (
+            <li key={index}>{term}</li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="container mx-auto p-8 bg-background text-foreground border-muted">
       <h1 className="text-4xl font-bold mb-8 text-primary">
         University Information System
       </h1>
+
+      {renderOverview()}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="bg-card border border-muted">
@@ -797,10 +939,12 @@ export default function Component() {
 
       <div className="mt-12">
         <h2 className="text-3xl font-bold mb-6 text-primary">
-          Data Visualization
+          Interactive Data Visualization
         </h2>
         {renderVisualization()}
       </div>
+
+      {renderHistory()}
     </div>
   );
 }
